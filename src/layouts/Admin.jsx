@@ -1,7 +1,7 @@
 import React from "react";
-import routes from "../routes.js";
-import { Route, Switch } from "react-router-dom";
-import Sidebar from "../components/Sidebar/Sidebar.jsx";
+import routes from "routes/routes.js";
+import { Route, Switch, Redirect } from "react-router-dom";
+import Sidebar from "components/Sidebar/Sidebar.jsx";
 import Navbar from "components/Navbars/Navbar.jsx";
 
 class Dashboard extends React.Component {
@@ -11,11 +11,19 @@ class Dashboard extends React.Component {
   }
 
   render() {
+    if (
+      this.props.location.pathname == "/" ||
+      this.props.location.pathname == "/admin" ||
+      this.props.location.pathname == "/admin/dashboard"
+    ) {
+      return <Redirect to="/admin/dashboard/project" />;
+    }
     return (
       <div className="wrapper">
         <Sidebar {...this.props} routes={routes} />
         <div className="main-panel" ref={this.mainPanel}>
           <Navbar {...this.props} />
+
           <Switch>
             {routes.map((prop, key) => {
               return (

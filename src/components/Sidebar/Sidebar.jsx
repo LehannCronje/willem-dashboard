@@ -40,7 +40,9 @@ class Sidebar extends React.Component {
       >
         <div className="sidebar-wrapper" ref={this.sidebar}>
           <div className="logo">
-            <span className="simple-text text-center">Lehann template</span>
+            <span className="simple-text text-center">
+              Project Dashboard App
+            </span>
           </div>
           <Nav>
             {this.props.routes.map((prop, key) => {

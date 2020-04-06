@@ -1,7 +1,8 @@
 import React from "react";
 import { Navbar, Container, NavbarBrand } from "reactstrap";
-
-import routes from "routes.js";
+import { Link } from "react-router-dom";
+import routes from "routes/routes.js";
+import projectRoutes from "routes/projectRoutes.js";
 
 class Header extends React.Component {
   constructor(props) {
@@ -11,6 +12,7 @@ class Header extends React.Component {
       color: "transparent"
     };
     this.sidebarToggle = React.createRef();
+    this.handleLogout = this.handleLogout.bind(this);
   }
 
   toggle() {
@@ -29,18 +31,40 @@ class Header extends React.Component {
   }
   getBrand() {
     let brandName = "Default Brand";
+    let elements = [];
     routes.map((prop, key) => {
       if (window.location.href.indexOf(prop.layout + prop.path) !== -1) {
         brandName = prop.name;
       }
       return null;
     });
-    return brandName;
+    projectRoutes.map((prop, key) => {
+      if (window.location.href.indexOf(prop.layout + prop.path) !== -1) {
+        elements.push(
+          <Link
+            key={key}
+            className="navbar-link"
+            to={{
+              pathname: prop.layout + prop.path
+            }}
+          >
+            {prop.name}
+          </Link>
+        );
+      }
+      return null;
+    });
+    return elements;
   }
 
   openSidebar() {
     document.documentElement.classList.toggle("nav-open");
     this.sidebarToggle.current.classList.toggle("toggled");
+  }
+
+  handleLogout() {
+    localStorage.clear();
+    this.props.history.push("/login");
   }
 
   render() {
@@ -63,8 +87,9 @@ class Header extends React.Component {
                 <span className="navbar-toggler-bar bar3" />
               </button>
             </div>
-            <NavbarBrand>{this.getBrand()}</NavbarBrand>
+            {this.getBrand()}
           </div>
+          <button onClick={this.handleLogout}>Logout</button>
         </Container>
       </Navbar>
     );

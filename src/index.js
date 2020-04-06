@@ -1,25 +1,46 @@
 import React from "react";
 import ReactDOM from "react-dom";
-import { Router, Route, Switch, Redirect } from "react-router-dom";
+import { BrowserRouter, Route, Switch, Redirect } from "react-router-dom";
 import { createBrowserHistory } from "history";
 import * as serviceWorker from "./serviceWorker";
 
 import AdminLayout from "./layouts/Admin.jsx";
+import Login from "./components/security/Login.jsx";
 
 import "bootstrap/dist/css/bootstrap.css";
 import "assets/scss/paper-dashboard.scss?v=1.1.0";
 import "assets/css/main.css";
 import "perfect-scrollbar/css/perfect-scrollbar.css";
+import AuthenticatedComponent from "./components/security/AuthenticatedCopmponent";
+import { getJwt } from "helpers/jwt";
+import axios from "axios";
 
 const hist = createBrowserHistory();
 
+axios.interceptors.request.use(
+  config => {
+    const token = getJwt();
+    if (token) {
+      config.headers["Authorization"] = "Bearer " + token;
+    }
+    // config.headers['Content-Type'] = 'application/json';
+    return config;
+  },
+  error => {
+    Promise.reject(error);
+  }
+);
+
 ReactDOM.render(
-  <Router history={hist}>
+  <BrowserRouter>
     <Switch>
-      <Route path="/admin" render={props => <AdminLayout {...props} />} />
-      <Redirect to="/admin/dashboard" />
+      <Route path="/login" component={Login} />
+      <AuthenticatedComponent>
+        <Route path="/" render={props => <AdminLayout {...props} />} />
+        {/* <Redirect to="/admin" /> */}
+      </AuthenticatedComponent>
     </Switch>
-  </Router>,
+  </BrowserRouter>,
   document.getElementById("root")
 );
 

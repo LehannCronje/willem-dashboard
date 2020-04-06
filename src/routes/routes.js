@@ -1,5 +1,5 @@
-import Dashboard from "./views/Dashboard.jsx";
-import User from "./views/Users.jsx";
+import Dashboard from "views/Dashboard.jsx";
+import User from "views/Users.jsx";
 
 var routes = [
   {
