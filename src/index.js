@@ -14,11 +14,12 @@ import "perfect-scrollbar/css/perfect-scrollbar.css";
 import AuthenticatedComponent from "./components/security/AuthenticatedCopmponent";
 import { getJwt } from "helpers/jwt";
 import axios from "axios";
+import "./config.js";
 
 const hist = createBrowserHistory();
 
 axios.interceptors.request.use(
-  config => {
+  (config) => {
     const token = getJwt();
     if (token) {
       config.headers["Authorization"] = "Bearer " + token;
@@ -26,7 +27,7 @@ axios.interceptors.request.use(
     // config.headers['Content-Type'] = 'application/json';
     return config;
   },
-  error => {
+  (error) => {
     Promise.reject(error);
   }
 );
@@ -36,7 +37,7 @@ ReactDOM.render(
     <Switch>
       <Route path="/login" component={Login} />
       <AuthenticatedComponent>
-        <Route path="/" render={props => <AdminLayout {...props} />} />
+        <Route path="/" render={(props) => <AdminLayout {...props} />} />
         {/* <Redirect to="/admin" /> */}
       </AuthenticatedComponent>
     </Switch>

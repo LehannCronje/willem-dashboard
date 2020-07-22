@@ -5,86 +5,85 @@ import {
   View,
   Document,
   StyleSheet,
-  Image
+  Image,
 } from "@react-pdf/renderer";
 
 const styles = StyleSheet.create({
   page: {},
   taskParent: {
     fontWeight: "bold",
-    fontSize: 50
+    fontSize: 50,
   },
   body: {
-    padding: 10
+    padding: 10,
   },
   table: {
     display: "table",
-    width: "auto"
+    width: "auto",
   },
   tableRow: {
     margin: "auto",
     flexDirection: "row",
     borderStyle: "solid",
     borderColor: "#bfbfbf",
-    borderBottomWidth: 1
+    borderBottomWidth: 1,
   },
   tableColHeader: {
     width: "16.66%",
     color: "#fff",
-    backgroundColor: "#00008b"
+    backgroundColor: "#00008b",
   },
   tableCol: {
-    width: "16.66%"
+    width: "16.66%",
   },
   parentTableCol: {
     width: "100%",
-    backgroundColor: "#BCD2E8"
+    backgroundColor: "#BCD2E8",
   },
   tableCellHeader: {
     width: "100%",
     margin: 5,
     fontSize: 12,
-    fontWeight: 500
+    fontWeight: 500,
   },
   tableCell: {
     margin: "auto",
     margin: 5,
-    fontSize: 10
+    fontSize: 10,
   },
   tableHeader: {
     flexDirection: "row",
-    border: "none"
+    border: "none",
   },
   pageNumberStyle: {
     flexDirection: "row",
     width: "33.33%",
     justifyContent: "flex-end",
-    fontSize: 5
+    fontSize: 5,
   },
   fileNameStyle: {
     flexDirection: "row",
     justifyContent: "center",
-    width: "33.33%"
+    width: "33.33%",
   },
   logoStyle: {
     flexDirection: "row",
     width: "33.33%",
-    justifyContent: "flex-start"
+    justifyContent: "flex-start",
   },
   nameStyle: {
     flexDirection: "row",
     width: "50%",
-    justifyContent: "flex-start"
+    justifyContent: "flex-start",
   },
   dateStyle: {
     flexDirection: "row",
     width: "50%",
-    justifyContent: "flex-end"
-  }
+    justifyContent: "flex-end",
+  },
 });
 
 export function PdfDocument(props) {
-  console.log(props);
   return (
     <Document>
       <Page wrap orientation={"landscape"} style={styles.page}>

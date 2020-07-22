@@ -4,7 +4,7 @@ import { Table } from "reactstrap";
 import axios from "axios";
 import Checkbox from "@material-ui/core/Checkbox";
 import { getJwt } from "helpers/jwt";
-import { apiGet } from "helpers/api";
+import { apiGet, apiPost } from "helpers/api";
 
 class updateReport extends React.Component {
   constructor(props) {
@@ -12,32 +12,31 @@ class updateReport extends React.Component {
     this.state = {
       updateReport: [],
       projectId: localStorage.getItem("projectId"),
-      checkbox: new Map()
+      checkbox: new Map(),
     };
     this.handleCheckChange = this.handleCheckChange.bind(this);
   }
 
   componentDidMount() {
-    console.log(this.state.projectId);
     this.getReports();
   }
 
   getReports() {
-    apiGet("report/update-report/" + this.state.projectId).then(res => {
+    apiGet("report/update-report/" + this.state.projectId).then((res) => {
       this.setState({
-        updateReport: res.data
+        updateReport: res.data,
       });
     });
   }
 
   handleCheckChange(e) {
     let id = e.target.value;
-    console.log(this.state.checkbox.get(id));
+
     this.setState({
       checkbox: this.state.checkbox.set(
         id,
         this.state.checkbox.get(id) ? false : true
-      )
+      ),
     });
   }
 
@@ -50,22 +49,18 @@ class updateReport extends React.Component {
 
     formData.append("data", resourceList);
 
-    axios
-      .post(apiConfig.apiHost + "/report/updateReport/download", formData, {
-        responseType: "arraybuffer",
-        headers: {
-          "Content-Type": "application/octet-stream"
-        }
-      })
-      .then(res => {
-        console.log(res);
-        const url = window.URL.createObjectURL(new Blob([res.data]));
-        const link = document.createElement("a");
-        link.href = url;
-        link.setAttribute("download", "download.zip");
-        document.body.appendChild(link);
-        link.click();
-      });
+    let config = {
+      responseType: "arraybuffer",
+    };
+
+    apiPost("report/updateReport/download", formData, config).then((res) => {
+      const url = window.URL.createObjectURL(new Blob([res.data]));
+      const link = document.createElement("a");
+      link.href = url;
+      link.setAttribute("download", "download.zip");
+      document.body.appendChild(link);
+      link.click();
+    });
   }
 
   render() {
@@ -97,10 +92,9 @@ class updateReport extends React.Component {
                 <td>
                   <Checkbox
                     checked={
-                      (console.log(this.state.checkbox.get(36)),
                       this.state.checkbox.get(report.id)
                         ? this.state.checkbox.get(report.id)
-                        : false)
+                        : false
                     }
                     onChange={this.handleCheckChange}
                     value={report.id}

@@ -5,6 +5,7 @@
   align-items: flex-start;
   text-align: left;
   overflow: hidden;
+  min-width: 400px;
 }
 
 .Content {
@@ -47,7 +48,6 @@
   flex: 1;
   flex-direction: column;
   justify-content: space-between;
-  height: 50px;
   padding: 8px;
   overflow: hidden;
   box-sizing: border-box;

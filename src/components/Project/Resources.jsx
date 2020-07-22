@@ -12,6 +12,7 @@ import { save } from "save-file";
 import { getJwt } from "helpers/jwt";
 import { apiGet } from "helpers/api";
 import { apiPost } from "helpers/api";
+import ReactLoading from "react-loading";
 
 class Resources extends React.Component {
   constructor(props) {
@@ -20,9 +21,13 @@ class Resources extends React.Component {
       resources: [],
       projectId: localStorage.getItem("projectId"),
       taskListData: new Map(),
-      checkbox: new Map()
+      checkbox: new Map(),
+      checkall: true,
+      isLoadingResources: false,
     };
     this.handleCheckChange = this.handleCheckChange.bind(this);
+    this.handleCheckAll = this.handleCheckAll.bind(this);
+    this.handleUnCheckAll = this.handleUnCheckAll.bind(this);
   }
 
   componentDidMount() {
@@ -32,18 +37,21 @@ class Resources extends React.Component {
   getResources() {
     const jwt = getJwt();
     let url = apiConfig.apiHost + "/project/";
-
-    apiGet("project/resources/" + this.state.projectId).then(res => {
+    this.setState({
+      isLoadingResources: true,
+    });
+    apiGet("project/resources/" + this.state.projectId).then((res) => {
       this.setState({
-        resources: res.data
+        resources: res.data,
+        isLoadingResources: false,
       });
     });
   }
 
   taskListReportData(id) {
-    apiGet("project/tasks" + id).then(result => {
+    apiGet("project/tasks" + id).then((result) => {
       this.setState({
-        taskListData: this.state.taskListData.set(id, result)
+        taskListData: this.state.taskListData.set(id, result),
       });
     });
   }
@@ -58,7 +66,34 @@ class Resources extends React.Component {
       checkbox: this.state.checkbox.set(
         e.target.value,
         this.state.checkbox.get(id) ? false : true
-      )
+      ),
+      checkall: true,
+    });
+  }
+
+  handleCheckAll() {
+    var newCheckBox = new Map();
+    var resource;
+    for (resource in this.state.resources) {
+      newCheckBox.set(this.state.resources[resource].id, true);
+    }
+
+    this.setState({
+      checkbox: newCheckBox,
+      checkall: false,
+    });
+  }
+
+  handleUnCheckAll() {
+    var newCheckBox = new Map();
+    var resource;
+    for (resource in this.state.resources) {
+      newCheckBox.set(this.state.resources[resource].id, false);
+    }
+
+    this.setState({
+      checkbox: newCheckBox,
+      checkall: true,
     });
   }
 
@@ -74,10 +109,10 @@ class Resources extends React.Component {
     formData.append("data", resourceList);
 
     let config = {
-      responseType: "arraybuffer"
+      responseType: "arraybuffer",
     };
 
-    apiPost("report/taskList", formData, config).then(res => {
+    apiPost("report/taskList", formData, config).then((res) => {
       console.log(res);
       const url = window.URL.createObjectURL(new Blob([res.data]));
       const link = document.createElement("a");
@@ -94,9 +129,27 @@ class Resources extends React.Component {
         <div className="col-12">
           <div className="row">
             <div className="col-4">
-              <button className="btn" onClick={() => this.handleCheckSubmit()}>
+              <button
+                className="btn btn-create"
+                onClick={() => this.handleCheckSubmit()}
+              >
                 generate Pdf
               </button>
+              {this.state.checkall ? (
+                <button
+                  className="btn btn-create"
+                  onClick={() => this.handleCheckAll()}
+                >
+                  Check All
+                </button>
+              ) : (
+                <button
+                  className="btn btn-create"
+                  onClick={() => this.handleUnCheckAll()}
+                >
+                  Uncheck All
+                </button>
+              )}
             </div>
             <div className="col-4  d-flex justify-content-center align-items-center">
               <h3 className="content-header">Resources</h3>
@@ -114,6 +167,23 @@ class Resources extends React.Component {
               </tr>
             </thead>
             <tbody>
+              {this.state.isLoadingResources ? (
+                <tr>
+                  <td colSpan="4">
+                    <div className="d-flex justify-content-center align-items-center">
+                      <ReactLoading type="bars" color="#204051" />
+                    </div>
+                  </td>
+                </tr>
+              ) : this.state.resources.length === 0 ? (
+                <tr>
+                  <td className="text-center" colSpan="4">
+                    No Resources
+                  </td>
+                </tr>
+              ) : (
+                ""
+              )}
               {this.state.resources.map((resource, i) => (
                 <tr key={i} ref={resource.id}>
                   <td>
@@ -132,10 +202,11 @@ class Resources extends React.Component {
                   <td>{resource.name}</td>
                   <td>
                     <Link
+                      className="table-link"
                       to={{
                         pathname:
                           projectRoutes[2].layout + projectRoutes[2].path,
-                        state: { resourceId: resource.id }
+                        state: { resourceId: resource.id },
                       }}
                     >
                       View Task List

@@ -3,16 +3,15 @@ import { getJwt } from "helpers/jwt";
 import axios from "axios";
 import { withRouter, Redirect } from "react-router-dom";
 import { apiGet } from "helpers/api";
+import ReactLoading from "react-loading";
 
 class AuthenticatedComponent extends React.Component {
   constructor(props) {
     super(props);
 
     this.state = {
-      user: undefined
+      user: undefined,
     };
-
-    console.log(props);
   }
 
   componentDidMount() {
@@ -21,12 +20,12 @@ class AuthenticatedComponent extends React.Component {
       this.props.history.push("/login");
     } else {
       apiGet("user/me")
-        .then(res => {
+        .then((res) => {
           this.setState({
-            user: res.data.username
+            user: res.data.username,
           });
         })
-        .catch(err => {
+        .catch((err) => {
           console.log(err);
           localStorage.removeItem("jwt-token");
           this.props.history.push("/login");
@@ -36,8 +35,12 @@ class AuthenticatedComponent extends React.Component {
   render() {
     if (this.state.user === undefined) {
       return (
-        <div>
-          <h1>Loading...</h1>
+        <div className="fluid-container loading-container">
+          <div className="row d-flex justify-content-center align-items-center h-100">
+            <div className="col-6 d-flex justify-content-center align-items-center">
+              <ReactLoading type="bars" color="#204051" />
+            </div>
+          </div>
         </div>
       );
     }

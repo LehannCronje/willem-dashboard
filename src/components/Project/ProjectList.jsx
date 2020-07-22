@@ -11,8 +11,9 @@ import {
   Dropdown,
   DropdownToggle,
   DropdownMenu,
-  DropdownItem
+  DropdownItem,
 } from "reactstrap";
+import ReactLoading from "react-loading";
 
 class ProjectList extends React.Component {
   constructor(props) {
@@ -23,13 +24,16 @@ class ProjectList extends React.Component {
       renderUpload: false,
       deleteLoading: false,
       filesReload: false,
-      dropdownOpen: new Map()
+      dropdownOpen: new Map(),
+      loadingProjects: false,
     };
 
     this.toggleUpload = this.toggleUpload.bind(this);
     this.setDeleteLoading = this.setDeleteLoading.bind(this);
     this.toggleFilesReload = this.toggleFilesReload.bind(this);
     this.toggleDropdown = this.toggleDropdown.bind(this);
+    this.unlockProject = this.unlockProject.bind(this);
+    this.lockProject = this.lockProject.bind(this);
   }
 
   componentDidMount() {
@@ -39,14 +43,17 @@ class ProjectList extends React.Component {
   getProjects() {
     const jwt = getJwt();
     let url = apiConfig.apiHost + "/project/";
-
+    this.setState({
+      loadingProjects: true,
+    });
     apiGet("project/all")
-      .then(res => {
+      .then((res) => {
         this.setState({
-          projects: res.data
+          projects: res.data,
+          loadingProjects: false,
         });
       })
-      .catch(err => {
+      .catch((err) => {
         console.log(err);
       });
   }
@@ -56,11 +63,11 @@ class ProjectList extends React.Component {
     formData.append("uid", id);
 
     apiPost("project/delete", formData)
-      .then(res => {
+      .then((res) => {
         console.log(res);
         this.getProjects();
       })
-      .catch(err => {
+      .catch((err) => {
         console.log(err);
       });
   }
@@ -73,8 +80,8 @@ class ProjectList extends React.Component {
   }
 
   toggleUpload() {
-    this.setState(prevState => ({
-      renderUpload: !prevState.renderUpload
+    this.setState((prevState) => ({
+      renderUpload: !prevState.renderUpload,
     }));
   }
 
@@ -83,32 +90,57 @@ class ProjectList extends React.Component {
   }
 
   setDeleteLoading() {
-    this.setState(prevState => ({
-      setDeleteLoading: !prevState.deleteLoading
+    this.setState((prevState) => ({
+      setDeleteLoading: !prevState.deleteLoading,
     }));
   }
 
   toggleDropdown(id) {
-    console.log(this.state.dropdownOpen);
     this.setState({
       dropdownOpen: this.state.dropdownOpen.set(
         id,
         this.state.dropdownOpen.get(id)
           ? !this.state.dropdownOpen.get(id)
           : true
-      )
+      ),
     });
   }
 
   handlePopup() {
-    this.setState(
-      prevState => ({
-        renderUpload: !prevState.renderUpload
-      }),
-      () => {
-        console.log(this.state.renderUpload);
-      }
-    );
+    this.setState((prevState) => ({
+      renderUpload: !prevState.renderUpload,
+    }));
+  }
+
+  lockProject(projectId) {
+    var url = "project/lock/" + projectId;
+    apiGet(url).then(() => {
+      this.getProjects();
+    });
+  }
+
+  unlockProject(projectId) {
+    var url = "project/unlock/" + projectId;
+    apiGet(url).then(() => {
+      this.getProjects();
+    });
+  }
+
+  downloadReport(projectId) {
+    var url = "report/update-report/download/" + projectId;
+
+    let config = {
+      responseType: "arraybuffer",
+    };
+
+    apiGet(url, config).then((res) => {
+      const url = window.URL.createObjectURL(new Blob([res.data]));
+      const link = document.createElement("a");
+      link.href = url;
+      link.setAttribute("download", "download.zip");
+      document.body.appendChild(link);
+      link.click();
+    });
   }
 
   render() {
@@ -140,14 +172,32 @@ class ProjectList extends React.Component {
             </tr>
           </thead>
           <tbody>
-            {this.state.projects.map(project => (
+            {this.state.loadingProjects ? (
+              <tr>
+                <td colSpan="3">
+                  <div className="d-flex justify-content-center align-items-center">
+                    <ReactLoading type="bars" color="#204051" />
+                  </div>
+                </td>
+              </tr>
+            ) : this.state.projects.length === 0 ? (
+              <tr>
+                <td className="text-center" colSpan="3">
+                  No Projects
+                </td>
+              </tr>
+            ) : (
+              ""
+            )}
+            {this.state.projects.map((project) => (
               <tr key={project.id}>
                 <td>{project.id}</td>
                 <td>
                   <Link
+                    className="table-link"
                     to={{
                       pathname: projectRoutes[1].layout + projectRoutes[1].path,
-                      state: { projectId: project.id }
+                      state: { projectId: project.id },
                     }}
                   >
                     {project.name}
@@ -196,6 +246,26 @@ class ProjectList extends React.Component {
                       >
                         Delete
                       </DropdownItem>
+                      {project.isLocked === "false" ? (
+                        <DropdownItem
+                          onClick={() => this.lockProject(project.id)}
+                        >
+                          Lock Project
+                        </DropdownItem>
+                      ) : (
+                        [
+                          <DropdownItem
+                            onClick={() => this.unlockProject(project.id)}
+                          >
+                            Unlock Project
+                          </DropdownItem>,
+                          <DropdownItem
+                            onClick={() => this.downloadReport(project.id)}
+                          >
+                            Download Report
+                          </DropdownItem>,
+                        ]
+                      )}
                     </DropdownMenu>
                   </Dropdown>
                 </td>

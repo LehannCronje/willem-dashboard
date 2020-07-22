@@ -17,9 +17,9 @@ class ProjectDetails extends React.Component {
           <div className="col-12">
             <Resources />
           </div>
-          <div className="col-12">
+          {/* <div className="col-12">
             <UpdateReport />
-          </div>
+          </div> */}
         </div>
       </div>
     );

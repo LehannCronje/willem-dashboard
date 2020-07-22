@@ -21,7 +21,7 @@ class Sidebar extends React.Component {
     if (navigator.platform.indexOf("Win") > -1) {
       ps = new PerfectScrollbar(this.sidebar.current, {
         suppressScrollX: true,
-        suppressScrollY: false
+        suppressScrollY: false,
       });
     }
   }
@@ -39,10 +39,12 @@ class Sidebar extends React.Component {
         data-active-color={this.props.activeColor}
       >
         <div className="sidebar-wrapper" ref={this.sidebar}>
-          <div className="logo">
-            <span className="simple-text text-center">
-              Project Dashboard App
-            </span>
+          <div className="logo mr-2">
+            <img
+              style={{ background: "white" }}
+              src="/placeholder-logo.svg"
+              alt=""
+            />
           </div>
           <Nav>
             {this.props.routes.map((prop, key) => {
@@ -60,6 +62,9 @@ class Sidebar extends React.Component {
               );
             })}
           </Nav>
+        </div>
+        <div className="logo">
+          <img src="/NEP.jpg" alt="" />
         </div>
       </div>
     );

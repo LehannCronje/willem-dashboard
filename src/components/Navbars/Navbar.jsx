@@ -9,7 +9,7 @@ class Header extends React.Component {
     super(props);
     this.state = {
       isOpen: true,
-      color: "transparent"
+      color: "transparent",
     };
     this.sidebarToggle = React.createRef();
     this.handleLogout = this.handleLogout.bind(this);
@@ -18,15 +18,15 @@ class Header extends React.Component {
   toggle() {
     if (this.state.isOpen) {
       this.setState({
-        color: "transparent"
+        color: "transparent",
       });
     } else {
       this.setState({
-        color: "dark"
+        color: "dark",
       });
     }
     this.setState({
-      isOpen: !this.state.isOpen
+      isOpen: !this.state.isOpen,
     });
   }
   getBrand() {
@@ -35,6 +35,19 @@ class Header extends React.Component {
     routes.map((prop, key) => {
       if (window.location.href.indexOf(prop.layout + prop.path) !== -1) {
         brandName = prop.name;
+        if (prop.name !== "Dashboard") {
+          elements.push(
+            <Link
+              key={key}
+              className="navbar-link"
+              to={{
+                pathname: prop.layout + prop.path,
+              }}
+            >
+              {prop.name}
+            </Link>
+          );
+        }
       }
       return null;
     });
@@ -45,7 +58,7 @@ class Header extends React.Component {
             key={key}
             className="navbar-link"
             to={{
-              pathname: prop.layout + prop.path
+              pathname: prop.layout + prop.path,
             }}
           >
             {prop.name}
@@ -89,7 +102,9 @@ class Header extends React.Component {
             </div>
             {this.getBrand()}
           </div>
-          <button onClick={this.handleLogout}>Logout</button>
+          <button className="btn btn-create" onClick={this.handleLogout}>
+            Logout
+          </button>
         </Container>
       </Navbar>
     );

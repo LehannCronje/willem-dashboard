@@ -17,7 +17,7 @@ class Popup extends React.Component {
       uploading: false,
       uploadProgress: {},
       successfullUploaded: false,
-      url: this.props.url
+      url: this.props.url,
     };
     this.handleShow = this.handleShow.bind(this);
     this.eventHandler = this.eventHandler.bind(this);
@@ -41,7 +41,7 @@ class Popup extends React.Component {
 
   eventHandler() {
     this.setState({
-      save: true
+      save: true,
     });
 
     this.handleShow();
@@ -50,8 +50,8 @@ class Popup extends React.Component {
   //Upload methods
 
   onFilesAdded(files) {
-    this.setState(prevState => ({
-      files: prevState.files.concat(files)
+    this.setState((prevState) => ({
+      files: prevState.files.concat(files),
     }));
   }
   renderProgress(file) {
@@ -69,6 +69,7 @@ class Popup extends React.Component {
     if (this.state.successfullUploaded) {
       return (
         <button
+          className="btn btn-action"
           onClick={() =>
             this.setState({ files: [], successfullUploaded: false })
           }
@@ -77,20 +78,33 @@ class Popup extends React.Component {
         </button>
       );
     } else {
-      return (
-        <button
-          disabled={this.state.files.length < 0 || this.state.uploading}
-          onClick={this.uploadFiles}
-        >
-          Upload
-        </button>
-      );
+      if (this.props.element === "button") {
+        return (
+          <button
+            className="btn btn-action"
+            disabled={this.state.files.length < 0 || this.state.uploading}
+            onClick={this.uploadFiles}
+          >
+            Create project
+          </button>
+        );
+      } else if (this.props.element === "dropdown") {
+        return (
+          <button
+            className="btn btn-action"
+            disabled={this.state.files.length < 0 || this.state.uploading}
+            onClick={this.uploadFiles}
+          >
+            Update Project
+          </button>
+        );
+      }
     }
   }
   async uploadFiles() {
     this.setState({ uploadProgress: {}, uploading: true });
     const promises = [];
-    this.state.files.forEach(file => {
+    this.state.files.forEach((file) => {
       this.props.toggleFilesReload(false);
       promises.push(this.sendRequest(file));
     });
@@ -114,33 +128,49 @@ class Popup extends React.Component {
       }
 
       let config = {
-        onUploadProgress: function(progressEvent) {
+        onUploadProgress: function (progressEvent) {
           const copy = { ...this.state.uploadProgress };
           var percentCompleted = Math.round(
-            (progressEvent.loaded * 100) / progressEvent.total
+            (progressEvent.loaded * 98) / progressEvent.total
           );
           copy[file.name] = {
             state: "pending",
-            percentage: percentCompleted
+            percentage: percentCompleted,
           };
-          this.setState({ uploadProgress: percentCompleted });
-        }.bind(this)
+          this.setState({ uploadProgress: copy });
+        }.bind(this),
       };
 
-      apiPost(this.props.url, formData, config).then(res => {
-        const copy = { ...this.state.uploadProgress };
-        copy[file.name] = { state: "done", percentage: 100 };
-        this.setState({ uploadProgress: copy, show: false });
-        this.props.toggleFilesReload();
-        resolve(res.statusText);
-      });
+      apiPost(this.props.url, formData, config)
+        .then((res) => {
+          const copy = { ...this.state.uploadProgress };
+          copy[file.name] = { state: "done", percentage: 100 };
+          this.setState({
+            uploadProgress: copy,
+            show: false,
+          });
+
+          this.props.toggleFilesReload();
+          resolve(res.statusText);
+        })
+        .catch((e) => {
+          alert(
+            "File with that name already exists. Please choose another name"
+          );
+          const copy = { ...this.state.uploadProgress };
+          copy[file.name] = { state: "done", percentage: 100 };
+          this.setState({
+            uploadProgress: copy,
+          });
+          resolve(e);
+        });
     });
   }
 
   getType() {
     if (this.props.element === "button") {
       return (
-        <Button variant="btn btn-success" onClick={this.handleShow}>
+        <Button variant="btn btn-create" onClick={this.handleShow}>
           Create
         </Button>
       );
@@ -161,19 +191,8 @@ class Popup extends React.Component {
     return (
       <>
         {this.getType()}
-        <Modal show={this.state.show} onHide={this.handleShow}>
-          <Modal.Header closeButton>
-            {this.props.element === "button" ? (
-              <Modal.Title>Create project</Modal.Title>
-            ) : (
-              ""
-            )}
-            {this.props.element === "dropdown" ? (
-              <Modal.Title>Update project</Modal.Title>
-            ) : (
-              ""
-            )}
-          </Modal.Header>
+        <Modal size="lg" show={this.state.show} onHide={this.handleShow}>
+          <Modal.Header closeButton></Modal.Header>
           <Modal.Body>
             <Upload
               toggleUpload={this.props.toggleUpload}

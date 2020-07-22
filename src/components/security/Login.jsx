@@ -1,6 +1,7 @@
 import React from "react";
 import axios from "axios";
 import { apiPost } from "helpers/api";
+import ReactLoading from "react-loading";
 
 class Login extends React.Component {
   constructor(props) {
@@ -9,15 +10,14 @@ class Login extends React.Component {
     this.state = {
       username: "",
       password: "",
-      error: false
+      error: false,
     };
-
     this.change = this.change.bind(this);
   }
 
   change(e) {
     this.setState({
-      [e.target.name]: e.target.value
+      [e.target.name]: e.target.value,
     });
   }
 
@@ -25,33 +25,32 @@ class Login extends React.Component {
     e.preventDefault();
     let data = {
       username: this.state.username,
-      password: this.state.password
+      password: this.state.password,
     };
     apiPost("auth/signin", data)
-      .then(res => {
+      .then((res) => {
         localStorage.setItem("jwt-token", res.data.token);
         this.props.history.push("/admin/dashboard");
       })
-      .catch(err => {
+      .catch((err) => {
         this.setState({
-          error: true
+          error: true,
         });
       });
   }
 
   render() {
     return (
-      <div className="login-wrapper">
-        <div className="col-xl-4 col-md-6 box-component-wrapper">
-          <h1 className="text-center">Login Form</h1>
-          {this.state.error ? <p>Wrong credentials</p> : ""}
-          <form onSubmit={e => this.submit(e)}>
+      <div className="login-wrapper fluid-container justify-content-center align-items-center d-flex">
+        <div className="col-xl-4 col-lg-6 col-md-6 col-sm-10 col-12 box-component-wrapper">
+          {this.state.error ? <p>Incorrect Username or password</p> : ""}
+          <form onSubmit={(e) => this.submit(e)}>
             <label>Username</label>
             <input
               className="form-control"
               type="text"
               name="username"
-              onChange={e => this.change(e)}
+              onChange={(e) => this.change(e)}
               value={this.state.username}
             />
             <label>Password</label>
@@ -59,10 +58,10 @@ class Login extends React.Component {
               className="form-control"
               type="text"
               name="password"
-              onChange={e => this.change(e)}
+              onChange={(e) => this.change(e)}
               value={this.state.password}
             />
-            <input className="btn btn-primary" type="submit" />
+            <input className="btn btn-action" type="submit" value="Sign in" />
           </form>
         </div>
       </div>

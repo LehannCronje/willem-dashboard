@@ -9,6 +9,7 @@ import {
   DropdownMenu,
   DropdownItem,
 } from "reactstrap";
+import ListGroup from "react-bootstrap/ListGroup";
 
 class UserPopup extends React.Component {
   constructor(props) {
@@ -18,8 +19,10 @@ class UserPopup extends React.Component {
       name: "",
       formData: this.props.data,
       dropdownOpen: false,
+      roleDropdownOpen: false,
       addedProjects: [],
       projects: [],
+      selectedRole: "",
     };
     this.handleShow = this.handleShow.bind(this);
     this.handleChange = this.handleChange.bind(this);
@@ -49,7 +52,7 @@ class UserPopup extends React.Component {
       data[x] = this.state.formData[x];
     }
     data["projects"] = projects;
-    console.log(data);
+    data.role = this.state.selectedRole;
     this.props.postMethod(data);
     this.handleShow();
   }
@@ -97,6 +100,12 @@ class UserPopup extends React.Component {
     });
   }
 
+  toggleRoleDropdown() {
+    this.setState({
+      roleDropdownOpen: !this.state.roleDropdownOpen,
+    });
+  }
+
   handleAddProject(project) {
     let temp = this.state.addedProjects;
     let found = temp.some((el) => el.id === project.id);
@@ -110,17 +119,18 @@ class UserPopup extends React.Component {
     }
   }
 
+  handleRoleDropdown(role) {
+    this.setState({
+      selectedRole: role,
+    });
+  }
+
   getProjects() {
     apiGet("project/all")
       .then((res) => {
-        this.setState(
-          {
-            projects: res.data,
-          },
-          () => {
-            console.log(this.state.projects);
-          }
-        );
+        this.setState({
+          projects: res.data,
+        });
       })
       .catch((err) => {
         console.log(err);
@@ -130,46 +140,89 @@ class UserPopup extends React.Component {
   render() {
     return (
       <>
-        <Button variant="btn btn-success" onClick={this.handleShow}>
+        <Button variant="btn btn-create" onClick={this.handleShow}>
           Create
         </Button>
 
         <Modal show={this.state.show} onHide={this.handleShow}>
-          <Modal.Header closeButton>
-            <Modal.Title>Create Farm</Modal.Title>
-          </Modal.Header>
+          <Modal.Header closeButton></Modal.Header>
           <Modal.Body>
             <this.generateForm />
-            <div>
-              <p>Added Projects</p>
-              {this.state.addedProjects.map((addedProject, i) => (
-                <p key={i}>{addedProject.name}</p>
-              ))}
-            </div>
-            <Dropdown
-              isOpen={this.state.dropdownOpen}
-              toggle={() => this.toggleDropdown()}
-            >
-              <DropdownToggle caret>Add</DropdownToggle>
-              <DropdownMenu>
-                <DropdownItem header>Add Project</DropdownItem>
-                {this.state.projects.map((project, index) => (
-                  <DropdownItem
-                    key={index}
-                    onClick={() => this.handleAddProject(project)}
+            <div className="col-12">
+              <div className="row d-flex justify-content-center align-items-center">
+                <div className="col-4">
+                  <Dropdown
+                    isOpen={this.state.roleDropdownOpen}
+                    toggle={() => this.toggleRoleDropdown()}
                   >
-                    {project.name}
-                  </DropdownItem>
+                    <DropdownToggle className="btn btn-create" caret>
+                      Select Role
+                    </DropdownToggle>
+                    <DropdownMenu>
+                      <DropdownItem header>Select Role</DropdownItem>
+
+                      <DropdownItem
+                        onClick={() => this.handleRoleDropdown("ROLE_MOBILE")}
+                      >
+                        Mobile role
+                      </DropdownItem>
+                      {/* <DropdownItem
+                        onClick={() => this.handleRoleDropdown("ROLE_USER")}
+                      >
+                        User role
+                      </DropdownItem> */}
+                    </DropdownMenu>
+                  </Dropdown>
+                </div>
+                <div className="col-8">
+                  <ListGroup.Item className="h-100">
+                    {this.state.selectedRole
+                      ? this.state.selectedRole
+                      : "Select a role"}
+                  </ListGroup.Item>
+                </div>
+              </div>
+            </div>
+
+            <hr />
+            <div className="col-12">
+              <div className="row d-flex justify-content-center align-items-center">
+                <div className="col-4">
+                  <Dropdown
+                    className=" mr-5"
+                    isOpen={this.state.dropdownOpen}
+                    toggle={() => this.toggleDropdown()}
+                  >
+                    <DropdownToggle className="btn btn-create" caret>
+                      Add Project
+                    </DropdownToggle>
+                    <DropdownMenu>
+                      <DropdownItem header>Select Project Project</DropdownItem>
+                      {this.state.projects.map((project, index) => (
+                        <DropdownItem
+                          key={index}
+                          onClick={() => this.handleAddProject(project)}
+                        >
+                          {project.name}
+                        </DropdownItem>
+                      ))}
+                    </DropdownMenu>
+                  </Dropdown>
+                </div>
+                <div className="col-8">
+                  <h4 className="m-0 text-center">Added Projects</h4>
+                </div>
+              </div>
+              <ListGroup>
+                {this.state.addedProjects.map((addedProject, i) => (
+                  <ListGroup.Item key={i}>{addedProject.name}</ListGroup.Item>
                 ))}
-              </DropdownMenu>
-            </Dropdown>
+              </ListGroup>
+            </div>
           </Modal.Body>
           <Modal.Footer>
-            <Button variant="secondary" onClick={this.handleShow}>
-              Close
-            </Button>
-            <Button variant="primary" onClick={this.eventHandler}>
-              Save Changes
+            <Button variant="btn btn-action" onClick={this.eventHandler}>
+              Create User
             </Button>
           </Modal.Footer>
         </Modal>
