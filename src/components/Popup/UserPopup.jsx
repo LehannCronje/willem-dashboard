@@ -2,7 +2,7 @@ import React from "react";
 import Button from "react-bootstrap/Button";
 import Modal from "react-bootstrap/Modal";
 import "./popup.css";
-import { apiGet } from "helpers/api";
+import { apiGet, apiPost } from "helpers/api";
 import {
   Dropdown,
   DropdownToggle,
@@ -10,6 +10,7 @@ import {
   DropdownItem,
 } from "reactstrap";
 import ListGroup from "react-bootstrap/ListGroup";
+import qs from "qs";
 
 class UserPopup extends React.Component {
   constructor(props) {
@@ -20,8 +21,11 @@ class UserPopup extends React.Component {
       formData: this.props.data,
       dropdownOpen: false,
       roleDropdownOpen: false,
+      resourceDropdownOpen: false,
       addedProjects: [],
+      addedResources: [],
       projects: [],
+      resources: [],
       selectedRole: "",
     };
     this.handleShow = this.handleShow.bind(this);
@@ -29,6 +33,7 @@ class UserPopup extends React.Component {
     this.eventHandler = this.eventHandler.bind(this);
     this.generateForm = this.generateForm.bind(this);
     this.toggleDropdown = this.toggleDropdown.bind(this);
+    this.toggleResourceDropdown = this.toggleResourceDropdown.bind(this);
   }
 
   handleShow() {
@@ -45,13 +50,18 @@ class UserPopup extends React.Component {
   eventHandler() {
     var data = {};
     let projects = [];
+    let resources =[];
     for (let key in this.state.addedProjects) {
       projects.push(this.state.addedProjects[key].id);
+    }
+    for (let key in this.state.addedResources) {
+      resources.push(this.state.addedResources[key].id);
     }
     for (let x in this.state.formData) {
       data[x] = this.state.formData[x];
     }
     data["projects"] = projects;
+    data["resources"] = resources;
     data.role = this.state.selectedRole;
     this.props.postMethod(data);
     this.handleShow();
@@ -72,6 +82,7 @@ class UserPopup extends React.Component {
   componentDidMount() {
     this.generateForm();
     this.getProjects();
+    this.getResources();
   }
   generateForm() {
     let form = [];
@@ -100,6 +111,12 @@ class UserPopup extends React.Component {
     });
   }
 
+  toggleResourceDropdown() {
+    this.setState({
+      resourceDropdownOpen: !this.state.resourceDropdownOpen,
+    });
+  }
+
   toggleRoleDropdown() {
     this.setState({
       roleDropdownOpen: !this.state.roleDropdownOpen,
@@ -116,6 +133,20 @@ class UserPopup extends React.Component {
       });
     } else {
       alert("project already exists");
+    }
+    this.getResources();
+  }
+
+  handleAddResource(resource){
+    let temp = this.state.addedResources;
+    let found = temp.some((el) => el.id === resource.id);
+    if (found === false) {
+      temp.push(resource);
+      this.setState({
+        addedResources: temp,
+      });
+    } else {
+      alert("resource already added");
     }
   }
 
@@ -135,6 +166,19 @@ class UserPopup extends React.Component {
       .catch((err) => {
         console.log(err);
       });
+  }
+
+  getResources() {
+    let data = [];
+    this.state.addedProjects.map((project) => {
+      data.push(project.id);
+    });
+    console.log(data);
+    apiPost("project/multiple-resources", data).then((res) => {
+      this.setState({
+        resources: res.data,
+      });
+    });
   }
 
   render() {
@@ -216,6 +260,42 @@ class UserPopup extends React.Component {
               <ListGroup>
                 {this.state.addedProjects.map((addedProject, i) => (
                   <ListGroup.Item key={i}>{addedProject.name}</ListGroup.Item>
+                ))}
+              </ListGroup>
+            </div>
+            <div className="col-12">
+              <div className="row d-flex justify-content-center align-items-center">
+                <div className="col-4">
+                  <Dropdown
+                    className=" mr-5"
+                    isOpen={this.state.resourceDropdownOpen}
+                    toggle={() => this.toggleResourceDropdown()}
+                  >
+                    <DropdownToggle className="btn btn-create" caret>
+                      Add Resources
+                    </DropdownToggle>
+                    <DropdownMenu className="scrolable-dropdown-menu">
+                      <DropdownItem header>Select a Resource</DropdownItem>
+                      {this.state.resources !== undefined
+                        ? this.state.resources.map((resource, index) => (
+                            <DropdownItem
+                              key={index}
+                              onClick={() => this.handleAddResource(resource)}
+                            >
+                              {resource.name}
+                            </DropdownItem>
+                          ))
+                        : ""}
+                    </DropdownMenu>
+                  </Dropdown>
+                </div>
+                <div className="col-8">
+                  <h4 className="m-0 text-center">Selected Resources</h4>
+                </div>
+              </div>
+              <ListGroup>
+                {this.state.addedResources.map((addedResource, i) => (
+                  <ListGroup.Item key={i}>{addedResource.name}</ListGroup.Item>
                 ))}
               </ListGroup>
             </div>

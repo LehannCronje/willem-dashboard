@@ -2,17 +2,20 @@ import React from "react";
 import apiConfig from "apiConfig.js";
 import { Table } from "reactstrap";
 import projectRoutes from "routes/projectRoutes.js";
-import { Route, Switch, Link, Router, Redirect } from "react-router-dom";
-import { PDFDownloadLink } from "@react-pdf/renderer";
-import { PdfDocument } from "components/Pdf/TaskListPdf.jsx";
+import {Link} from "react-router-dom";
 import Checkbox from "@material-ui/core/Checkbox";
-import axios from "axios";
-import { save } from "save-file";
-
+import Button from "react-bootstrap/Button";
 import { getJwt } from "helpers/jwt";
 import { apiGet } from "helpers/api";
 import { apiPost } from "helpers/api";
 import ReactLoading from "react-loading";
+import {
+  Dropdown,
+  DropdownToggle,
+  DropdownMenu,
+  DropdownItem,
+} from "reactstrap";
+
 
 class Resources extends React.Component {
   constructor(props) {
@@ -24,10 +27,16 @@ class Resources extends React.Component {
       checkbox: new Map(),
       checkall: true,
       isLoadingResources: false,
+      selectedFilter:"Weeks",
+      filterDropdownOpen:false,
+      filterInputValue:2,
+      filterButtonText:"Add filter"
     };
     this.handleCheckChange = this.handleCheckChange.bind(this);
     this.handleCheckAll = this.handleCheckAll.bind(this);
     this.handleUnCheckAll = this.handleUnCheckAll.bind(this);
+    this.handleFilterInputChange = this.handleFilterInputChange.bind(this);
+    this.handlerAddFilterButton = this.handlerAddFilterButton.bind(this);
   }
 
   componentDidMount() {
@@ -46,6 +55,12 @@ class Resources extends React.Component {
         isLoadingResources: false,
       });
     });
+  }
+
+  handleFilterInputChange(e){
+    this.setState({
+      filterInputValue: e.target.value,
+    })
   }
 
   taskListReportData(id) {
@@ -69,6 +84,18 @@ class Resources extends React.Component {
       ),
       checkall: true,
     });
+  }
+
+  handleDropdown(selectedItem){
+    this.setState({
+      selectedFilter: selectedItem,
+    })
+  }
+
+  toggleDropdown(){
+    this.setState({
+      filterDropdownOpen: !this.state.filterDropdownOpen,
+    })
   }
 
   handleCheckAll() {
@@ -103,10 +130,15 @@ class Resources extends React.Component {
     let iterator = this.state.checkbox.entries();
     let resourceList = [];
     this.state.checkbox.forEach((value, key, map) => {
-      resourceList.push(key);
+      if(this.state.checkbox.get(key)){
+        resourceList.push(key);
+      }
+      
     });
 
     formData.append("data", resourceList);
+    formData.append("filterType", this.state.selectedFilter === "" ? "Weeks" : this.state.selectedFilter);
+    formData.append("timeValue", this.state.filterInputValue === "" ? "2" : this.state.filterInputValue);
 
     let config = {
       responseType: "arraybuffer",
@@ -121,6 +153,20 @@ class Resources extends React.Component {
       document.body.appendChild(link);
       link.click();
     });
+  }
+
+  handlerAddFilterButton(){
+
+    console.log("added");
+
+    this.setState({
+      filterButtonText: "filter Added"
+    })
+
+    setTimeout(() => { this.setState({
+      filterButtonText: "Add Filter",
+    }) }, 3000);
+
   }
 
   render() {
@@ -151,8 +197,40 @@ class Resources extends React.Component {
                 </button>
               )}
             </div>
-            <div className="col-4  d-flex justify-content-center align-items-center">
+            <div className="col-3  d-flex justify-content-center align-items-center">
               <h3 className="content-header">Resources</h3>
+            </div>
+            <div className="col-5  d-flex justify-content-center align-items-center">
+              <p className="filter-input-text">Look ahead: </p>
+              <input className="filter-input" type="text" onChange={this.handleFilterInputChange} value={this.state.filterInputValue}/>
+              <Dropdown
+                    isOpen={this.state.filterDropdownOpen}
+                    toggle={() => this.toggleDropdown()}
+                  >
+                    <DropdownToggle className="btn btn-create" caret>
+                      {this.state.selectedFilter !== "" ? this.state.selectedFilter : "Select Type"}
+                    </DropdownToggle>
+                    <DropdownMenu>
+                      <DropdownItem header>Select Type</DropdownItem>
+
+                      <DropdownItem
+                        onClick={() => this.handleDropdown("Hours")}
+                      >
+                        Hours
+                      </DropdownItem>
+                      <DropdownItem
+                        onClick={() => this.handleDropdown("Days")}
+                      >
+                        Days
+                      </DropdownItem>
+                      <DropdownItem
+                        onClick={() => this.handleDropdown("Weeks")}
+                      >
+                        Weeks
+                      </DropdownItem>
+                    </DropdownMenu>
+                  </Dropdown>
+                  <button onClick={() => this.handlerAddFilterButton()} className="btn btn-create">{this.state.filterButtonText}</button>
             </div>
           </div>
         </div>
@@ -182,7 +260,7 @@ class Resources extends React.Component {
                   </td>
                 </tr>
               ) : (
-                ""
+                <tr></tr>
               )}
               {this.state.resources.map((resource, i) => (
                 <tr key={i} ref={resource.id}>
@@ -206,7 +284,7 @@ class Resources extends React.Component {
                       to={{
                         pathname:
                           projectRoutes[2].layout + projectRoutes[2].path,
-                        state: { resourceId: resource.id },
+                        state: { resourceId: resource.id , selectedFilter: this.state.selectedFilter, filterInputValue: this.state.filterInputValue},
                       }}
                     >
                       View Task List

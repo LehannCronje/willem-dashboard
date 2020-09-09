@@ -362,6 +362,27 @@
   overflow: hidden;
 }
 
+.scrolable-dropdown-menu{
+  max-height: 400% !important;
+  overflow-y: scroll !important;
+}
+
+.icon{
+  max-height: 24px;
+  width:auto;
+}
+
+.filter-input{
+  width:60px;
+}
+
+.filter-input-text{
+  font-size: 16px;
+  margin:10px;
+  text-align: center;
+}
+
+
 @media screen and (max-width: 991px) {
   .main-panel {
     width: 100%;

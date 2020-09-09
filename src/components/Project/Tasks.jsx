@@ -2,7 +2,7 @@ import React from "react";
 import apiConfig from "apiConfig.js";
 import { Table } from "reactstrap";
 import Axios from "axios";
-import { apiGet } from "helpers/api";
+import { apiPost } from "helpers/api";
 import ReactLoading from "react-loading";
 
 class Tasks extends React.Component {
@@ -23,7 +23,11 @@ class Tasks extends React.Component {
     this.setState({
       loadingTask: true,
     });
-    apiGet("project/tasks/" + this.state.resourceId).then((result) => {
+
+    const data = new FormData();
+    data.append("filterType", this.props.location.state.selectedFilter === "" ? "Weeks" :  this.props.location.state.selectedFilter);
+    data.append("timeValue",  this.props.location.state.filterInputValue === "" ? "2" :  this.props.location.state.filterInputValue);
+    apiPost("project/tasks/filter/" + this.state.resourceId, data).then((result) => {
       this.setState({
         tasks: result.data,
         loadingTask: false,
@@ -47,12 +51,13 @@ class Tasks extends React.Component {
                 <th>Start</th>
                 <th>Finish</th>
                 <th>Notes</th>
+                <th>Started</th>
               </tr>
             </thead>
             <tbody>
               {this.state.loadingTask ? (
                 <tr>
-                  <td colSpan="6">
+                  <td colSpan="7">
                     <div className="d-flex justify-content-center align-items-center">
                       <ReactLoading type="bars" color="#204051" />
                     </div>
@@ -65,13 +70,13 @@ class Tasks extends React.Component {
                   </td>
                 </tr>
               ) : (
-                ""
+                <tr></tr>
               )}
               {this.state.tasks.map((parentTask) => {
                 return [
                   <tr key={parentTask.id}>
                     <td style={{ fontWeight: "bold" }}>{parentTask.id}</td>
-                    <td colSpan="5" style={{ fontWeight: "bold" }}>
+                    <td colSpan="7" style={{ fontWeight: "bold" }}>
                       {parentTask.name}
                     </td>
                   </tr>, // note the comma
@@ -83,6 +88,7 @@ class Tasks extends React.Component {
                       <td>{task.start}</td>
                       <td>{task.finish}</td>
                       <td>{task.notes}</td>
+                      <td>{task.isStarted}</td>
                     </tr>
                   )),
                 ];

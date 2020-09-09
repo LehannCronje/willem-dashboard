@@ -127,6 +127,13 @@ class Popup extends React.Component {
         formData.append("puid", this.props.projectId);
       }
 
+      var jsonData = {
+        "projectId": 1
+      }
+      var data = new FormData();
+      data.append("projectFile",file);
+      data.append("projectId",1);
+
       let config = {
         onUploadProgress: function (progressEvent) {
           const copy = { ...this.state.uploadProgress };

@@ -187,7 +187,7 @@ class ProjectList extends React.Component {
                 </td>
               </tr>
             ) : (
-              ""
+              <tr></tr>
             )}
             {this.state.projects.map((project) => (
               <tr key={project.id}>
@@ -262,7 +262,7 @@ class ProjectList extends React.Component {
                           <DropdownItem
                             onClick={() => this.downloadReport(project.id)}
                           >
-                            Download Report
+                            Download Update Report
                           </DropdownItem>,
                         ]
                       )}

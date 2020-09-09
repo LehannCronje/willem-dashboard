@@ -12,6 +12,7 @@ import {
 } from "reactstrap";
 import UserProjectPopup from "components/Popup/UserProjectPopup";
 import ReactLoading from "react-loading";
+import UserResourcePopup from "components/Popup/UserResourcePopup";
 
 class UserAccountList extends React.Component {
   constructor(props) {
@@ -34,6 +35,7 @@ class UserAccountList extends React.Component {
     this.changeUserPasswordPost = this.changeUserPasswordPost.bind(this);
     this.getProjects = this.getProjects.bind(this);
     this.updateUserProjectsPost = this.updateUserProjectsPost.bind(this);
+    this.updateUserResourcesPost = this.updateUserResourcesPost.bind(this);
     this.toggleUpload = this.toggleUpload.bind(this);
   }
 
@@ -129,6 +131,14 @@ class UserAccountList extends React.Component {
     });
   }
 
+  updateUserResourcesPost(data){
+    let url = "user/updateResources";
+
+    apiPost(url,data).then(() => {
+      this.getUserAccounts();
+      this.getProjects();
+    })
+  }
   render() {
     return (
       <div className="content box-component-wrapper">
@@ -153,6 +163,7 @@ class UserAccountList extends React.Component {
               <th>role</th>
               <th>State</th>
               <th>Projects</th>
+              <th>Resources</th>
               <th style={{ width: "10%" }}>Action</th>
             </tr>
           </thead>
@@ -184,6 +195,12 @@ class UserAccountList extends React.Component {
                       projects={this.state.projects}
                       userProjects={account.projects}
                       userId={account.id}
+                    />
+                  </td>
+                  <td>
+                    <UserResourcePopup
+                      userId={account.id}
+                      postMethod={this.updateUserResourcesPost}
                     />
                   </td>
                   <td style={{ padding: "0px", textAlign: "center" }}>
