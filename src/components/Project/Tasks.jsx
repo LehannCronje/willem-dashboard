@@ -28,6 +28,7 @@ class Tasks extends React.Component {
     data.append("filterType", this.props.location.state.selectedFilter === "" ? "Weeks" :  this.props.location.state.selectedFilter);
     data.append("timeValue",  this.props.location.state.filterInputValue === "" ? "2" :  this.props.location.state.filterInputValue);
     apiPost("project/tasks/filter/" + this.state.resourceId, data).then((result) => {
+      console.log(result.data);
       this.setState({
         tasks: result.data,
         loadingTask: false,
@@ -88,7 +89,7 @@ class Tasks extends React.Component {
                       <td>{task.start}</td>
                       <td>{task.finish}</td>
                       <td>{task.notes}</td>
-                      <td>{task.isStarted}</td>
+                      <td>{task.isStarted === "false" ? "No":"Yes"}</td>
                     </tr>
                   )),
                 ];

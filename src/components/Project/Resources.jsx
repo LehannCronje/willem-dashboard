@@ -27,9 +27,9 @@ class Resources extends React.Component {
       checkbox: new Map(),
       checkall: true,
       isLoadingResources: false,
-      selectedFilter:"Weeks",
+      selectedFilter: localStorage.getItem("filterType") === null ? "Weeks" :  localStorage.getItem("filterType"),
       filterDropdownOpen:false,
-      filterInputValue:2,
+      filterInputValue: localStorage.getItem("timeValue") === null ? "2" :  localStorage.getItem("timeValue"),
       filterButtonText:"Add filter"
     };
     this.handleCheckChange = this.handleCheckChange.bind(this);
@@ -136,6 +136,7 @@ class Resources extends React.Component {
       
     });
 
+
     formData.append("data", resourceList);
     formData.append("filterType", this.state.selectedFilter === "" ? "Weeks" : this.state.selectedFilter);
     formData.append("timeValue", this.state.filterInputValue === "" ? "2" : this.state.filterInputValue);
@@ -157,7 +158,8 @@ class Resources extends React.Component {
 
   handlerAddFilterButton(){
 
-    console.log("added");
+    localStorage.setItem("filterType", this.state.selectedFilter === "" ? "Weeks" : this.state.selectedFilter)
+    localStorage.setItem("timeValue", this.state.filterInputValue === "" ? "2" : this.state.filterInputValue,)
 
     this.setState({
       filterButtonText: "filter Added"
@@ -263,6 +265,7 @@ class Resources extends React.Component {
                 <tr></tr>
               )}
               {this.state.resources.map((resource, i) => (
+                
                 <tr key={i} ref={resource.id}>
                   <td>
                     <Checkbox

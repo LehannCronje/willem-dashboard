@@ -8,6 +8,7 @@ import {
 import { apiGet, apiPost } from "helpers/api";
 import { Button, Modal } from "react-bootstrap";
 import ListGroup from "react-bootstrap/ListGroup";
+import Checkbox from "@material-ui/core/Checkbox";
 
 class UserResourcePopup extends React.Component {
   constructor(props) {
@@ -23,11 +24,13 @@ class UserResourcePopup extends React.Component {
       removedResources: [],
       selectedProject: "",
       selectedResource: "",
+      checkbox: new Map(),
     };
     this.handleShow = this.handleShow.bind(this);
     this.addResource = this.addResource.bind(this);
     this.postUpdatedUserResources = this.postUpdatedUserResources.bind(this);
     this.removeResource = this.removeResource.bind(this);
+    this.handleCheckChange = this.handleCheckChange.bind(this);
   }
 
   componentDidMount() {
@@ -87,25 +90,25 @@ class UserResourcePopup extends React.Component {
       });
   }
 
-  updateUserResources() {}
+  updateUserResources() { }
 
   postUpdatedUserResources() {
-    
+
     let removedResourcesIds = [];
     let addedResourcesIds = [];
 
-    this.state.removedResources.forEach((element,index) => {
-        removedResourcesIds.push(element.id);
+    this.state.removedResources.forEach((element, index) => {
+      removedResourcesIds.push(element.id);
     })
 
-    this.state.tempAssignedResources.forEach((element,index) => {
-        addedResourcesIds.push(element.id);
+    this.state.tempAssignedResources.forEach((element, index) => {
+      addedResourcesIds.push(element.id);
     })
 
     let data = {
-        "removedResources": removedResourcesIds,
-        "addedResources": addedResourcesIds,
-        "userId": this.props.userId,
+      "removedResources": removedResourcesIds,
+      "addedResources": addedResourcesIds,
+      "userId": this.props.userId,
     }
 
 
@@ -118,13 +121,13 @@ class UserResourcePopup extends React.Component {
     let foundInAssignedResources = this.state.assignedResources.some(
       (el) => resource.id === el.id
     );
-    
+
     let tempRemoveArr = this.state.removedResources;
     let resourceData = {
-        id: resource.id,
-        name: resource.name,
-        projectName: this.state.selectedProject.name,
-      };
+      id: resource.id,
+      name: resource.name,
+      projectName: this.state.selectedProject.name,
+    };
     if (foundInAssignedResources) {
       tempRemoveArr.push(resourceData);
     }
@@ -140,34 +143,65 @@ class UserResourcePopup extends React.Component {
     });
   }
 
+  checkFoundInAssignedResources(resource) {
+    return this.state.tempAssignedResources.some(
+      (el) => resource.id === el.id
+    );
+  }
   addResource() {
-    let resource = this.state.selectedResource;
+    // let resource = this.state.selectedResource;
     let tempResourceList = this.state.tempAssignedResources;
     let tempRemoveArr = this.state.removedResources;
 
-    let foundInAssignedResources = this.state.tempAssignedResources.some(
-      (el) => resource.id === el.id
-    );
+    // let foundInAssignedResources = this.state.tempAssignedResources.some(
+    //   (el) => resource.id === el.id
+    // );
 
-    tempRemoveArr.forEach((r, index) => {
-      if (r.id === resource.id) {
-        if (index > -1) {
-          tempRemoveArr.splice(index, 1);
-        }
+
+
+    // if (!foundInAssignedResources) {
+    //   let resourceData = {
+    //     id: resource.id,
+    //     name: resource.name,
+    //     projectName: this.state.selectedProject.name,
+    //   };
+    //   tempResourceList.push(resourceData);
+    //   this.setState({
+    //     tempAssignedResources: tempResourceList,
+    //   });
+    // }
+    this.state.checkbox.forEach((value, key, map) => {
+      if (this.state.checkbox.get(key)) {
+        let resource = this.state.resources.find(
+          (el) => {
+            if (key === el.id) {
+              return el;
+            }
+          }
+        );
+        console.log(resource)
+        // tempRemoveArr.forEach((r, index) => {
+        //   if (r.id === resource.id) {
+        //     if (index > -1) {
+        //       tempRemoveArr.splice(index, 1);
+        //     }
+        //   }
+        // });
+
+        let resourceData = {
+          id: resource.id,
+          name: resource.name,
+          projectName: this.state.selectedProject.name,
+        };
+        tempResourceList.push(resourceData);
+        this.setState({
+          tempAssignedResources: tempResourceList,
+          checkbox: new Map()
+        });
       }
+
     });
 
-    if (!foundInAssignedResources) {
-      let resourceData = {
-        id: resource.id,
-        name: resource.name,
-        projectName: this.state.selectedProject.name,
-      };
-      tempResourceList.push(resourceData);
-      this.setState({
-        tempAssignedResources: tempResourceList,
-      });
-    }
   }
 
   handleSelectedProject(project) {
@@ -180,6 +214,17 @@ class UserResourcePopup extends React.Component {
   handleSelectedResource(resource) {
     this.setState({
       selectedResource: resource,
+    });
+  }
+
+  handleCheckChange(e) {
+    let id = e.target.value;
+    console.log(id);
+    this.setState({
+      checkbox: this.state.checkbox.set(
+        e.target.value,
+        this.state.checkbox.get(id) ? false : true
+      ),
     });
   }
 
@@ -198,7 +243,7 @@ class UserResourcePopup extends React.Component {
               <h3 className="text-center m-0">Add Resources</h3>
               <hr></hr>
               <div className="row d-flex justify-content-center align-items-center">
-                <div className="col-4">
+                <div className="col-12">
                   <Dropdown
                     isOpen={this.state.userPorjectDropdownOpen}
                     toggle={() => this.toggleUserProjectDropdown()}
@@ -218,33 +263,36 @@ class UserResourcePopup extends React.Component {
                       ))}
                     </DropdownMenu>
                   </Dropdown>
+                  <ListGroup.Item className="text-center selected-project"><strong>Selected Project: </strong>{this.state.selectedProject.name === undefined ? "Select a project" : this.state.selectedProject.name}</ListGroup.Item>
                 </div>
-                <div className="col-4">
-                  <Dropdown
-                    isOpen={this.state.userResourceDropdownOpen}
-                    toggle={() => this.toggleUserResourceDropdown()}
-                  >
-                    <DropdownToggle className="btn btn-create w-100" caret>
-                      Select Resource
-                    </DropdownToggle>
-                    <DropdownMenu>
-                      <DropdownItem header>Select Resource</DropdownItem>
-                      {this.state.resources.map((resource, index) => (
-                        <DropdownItem
-                          key={index}
-                          onClick={() => this.handleSelectedResource(resource)}
-                        >
-                          {resource.name}
-                        </DropdownItem>
-                      ))}
-                    </DropdownMenu>
-                  </Dropdown>
+                <div className="col-12">
+                  {this.state.resources.map((resource, index) => {
+                    // console.log(this.checkFoundInAssignedResources(resource));
+                    if (!this.checkFoundInAssignedResources(resource)) {
+                      return (<ListGroup.Item>
+                        <Checkbox
+                          checked={
+                            this.state.checkbox.get(resource.id)
+                              ? this.state.checkbox.get(resource.id)
+                              : false
+                          }
+                          onChange={this.handleCheckChange}
+                          value={resource.id}
+                          inputProps={{ "aria-label": "secondary checkbox" }}
+                        />
+                        {resource.name}
+                      </ListGroup.Item>
+                      )
+                    }
+                  })}
                 </div>
+                {this.state.selectedProject.name === undefined ? "" : 
                 <div className="col-2">
                   <button className="btn btn-action" onClick={this.addResource}>
                     Add
                   </button>
-                </div>
+                </div>}
+                
               </div>
             </div>
             <div className="col-12">
@@ -256,28 +304,28 @@ class UserResourcePopup extends React.Component {
                     <p>no Resources</p>
                   </div>
                 ) : (
-                  this.state.tempAssignedResources.map((resource) => {
-                    return (
-                      <div className="col-12 ">
-                        <div className="row d-flex">
-                          <div className="col-10">
-                            <ListGroup.Item>
-                              {resource.name} | {resource.projectName}
-                            </ListGroup.Item>
-                          </div>
-                          <div className="col-2 align-self-center">
-                            <Button
-                              className="btn btn-action"
-                              onClick={() => this.removeResource(resource)}
-                            >
-                              Remove
+                    this.state.tempAssignedResources.map((resource) => {
+                      return (
+                        <div className="col-12 ">
+                          <div className="row d-flex">
+                            <div className="col-10">
+                              <ListGroup.Item>
+                                {resource.name} | {resource.projectName}
+                              </ListGroup.Item>
+                            </div>
+                            <div className="col-2 align-self-center">
+                              <Button
+                                className="btn btn-action"
+                                onClick={() => this.removeResource(resource)}
+                              >
+                                Remove
                             </Button>
+                            </div>
                           </div>
                         </div>
-                      </div>
-                    );
-                  })
-                )}
+                      );
+                    })
+                  )}
               </ListGroup>
             </div>
           </Modal.Body>

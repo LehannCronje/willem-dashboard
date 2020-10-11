@@ -47,6 +47,7 @@ class ChangePasswordPopup extends React.Component {
       data[x] = this.state.formData[x];
     }
     data.username = this.props.username;
+    console.log(data);
     this.props.postMethod(data);
     this.handleShow();
   }
@@ -90,15 +91,6 @@ class ChangePasswordPopup extends React.Component {
   render() {
     return (
       <>
-        <div
-          onClick={this.handleShow}
-          className="dropdown-item"
-          role="menu-item"
-          style={{ width: "100%", height: "100%" }}
-        >
-          Change Password
-        </div>
-
         <Modal show={this.state.show} onHide={this.handleShow}>
           <Modal.Header closeButton>
             {/* <Modal.Title>{this.state.title}</Modal.Title> */}
@@ -108,7 +100,7 @@ class ChangePasswordPopup extends React.Component {
           </Modal.Body>
           <Modal.Footer>
             <Button className="btn btn-action" onClick={this.eventHandler}>
-              {this.props.buttonText}
+              Change password
             </Button>
           </Modal.Footer>
         </Modal>

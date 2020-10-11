@@ -227,15 +227,17 @@ class UserAccountList extends React.Component {
                       <DropdownMenu>
                         <DropdownItem header>Project Properties</DropdownItem>
 
-                        {/* <ChangePasswordPopup
+                        <ChangePasswordPopup
+                          style={{ display: "none" }}
                           postMethod={this.changeUserPasswordPost}
                           data={this.state.changePasswordData}
-                          buttonText="Change Password"
                           username={account.name}
                           renderPopup={this.state.renderPopup}
                           toggleUpload={this.toggleUpload}
-                        /> */}
-
+                        />
+                      <DropdownItem onClick={() => this.toggleUpload()}>
+                        Change User Password
+                      </DropdownItem>
                         {account.isActive === "ACTIVE" ? (
                           <DropdownItem
                             onClick={() => this.deactivateUser(account.name)}
